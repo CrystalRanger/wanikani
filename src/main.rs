@@ -8,12 +8,17 @@ const APIENDPOINT: &str = "https://api.wanikani.com/v2/";
 
 #[tokio::main]
 async fn main() {
+    //get the json data
     let reviews = get_json("assignments?immediately_available_for_review=true").await.unwrap();
     let lessons = get_json("assignments?immediately_available_for_lessons=true").await.unwrap();
     let user: Value = serde_json::from_str(get_json("user").await.unwrap().as_str()).unwrap();
+
     let mut username = user["data"]["username"].to_string();
+
+    //remove quotes in a very stupid manner
     username.pop();
     username.remove(0);
+
     println!("Hello, {}!", username);
 
 
@@ -21,21 +26,7 @@ async fn main() {
     let r_deserialized: Value = serde_json::from_str(reviews.as_str()).unwrap();
     let l_deserialized: Value = serde_json::from_str(lessons.as_str()).unwrap();
 
-    let r_vec = match &r_deserialized["data"] {
-        Value::Array(v) => v,
-        _ => {
-            panic!();
-        }
-    };
-
-    let l_vec = match &l_deserialized["data"] {
-        Value::Array(v) => v,
-        _ => {
-            panic!();
-        }
-    };
-
-    println!("You have {} reviews, and {} lessons", r_vec.len(), l_vec.len());
+    println!("You have {} reviews, and {} lessons", r_deserialized["total_count"], l_deserialized["total_count"]);
 
 }
 
